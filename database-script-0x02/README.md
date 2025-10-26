@@ -1,38 +1,28 @@
-# Airbnb Clone Database Schema
+# Airbnb Clone - Database Seeding Script
 
 ## 📘 Objective
-This directory contains SQL scripts to create the **Airbnb clone** database schema, defining all entities, constraints, and relationships.
+This script populates the **Airbnb clone database** with realistic sample data for testing and development purposes.
 
 ---
 
 ## 🧱 Files
-- **schema.sql** — Contains all `CREATE TABLE` statements for the project.
-- **README.md** — Documentation for schema structure and setup instructions.
+- **seed.sql** — SQL script that inserts sample records into all main tables.
+- **README.md** — Documentation and usage instructions.
 
 ---
 
-## 🗂️ Entities Included
-1. **users** — Stores user information (guests, hosts, admins)
-2. **properties** — Details about listed properties
-3. **bookings** — Reservation information linking users and properties
-4. **payments** — Payment transactions for bookings
-5. **reviews** — User reviews on properties
-6. **messages** — Communication between users
-
----
-
-## ⚙️ Relationships
-- One **user** (host) → many **properties**
-- One **user** (guest) → many **bookings**
-- One **property** → many **bookings**
-- One **booking** → one **payment**
-- One **property** → many **reviews**
-- One **user** → many **messages** (as sender or recipient)
+## 🗂️ Entities Populated
+1. **users** — Includes guests, hosts, and an admin account.  
+2. **properties** — Each property belongs to a host.  
+3. **bookings** — Created by guests and linked to properties.  
+4. **payments** — Linked to confirmed bookings.  
+5. **reviews** — Posted by users after a stay.  
+6. **messages** — Simulates conversation between a guest and host.
 
 ---
 
 ## 🚀 How to Run
-To execute the schema on PostgreSQL:
+To execute the script on PostgreSQL:
 
 ```bash
-psql -U postgres -d airbnb_clone -f schema.sql
+psql -U postgres -d airbnb_clone -f seed.sql
