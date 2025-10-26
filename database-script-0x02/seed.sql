@@ -1,101 +1,71 @@
--- schema.sql
--- Airbnb Clone Database Schema
--- Author: Gedion
+-- seed.sql
+-- Airbnb Clone - Sample Data Seeding Script
+-- Author: [Your Name]
 -- Repository: alx-airbnb-database
 
 -- ===========================
--- USER TABLE
+-- USERS
 -- ===========================
-CREATE TABLE users (
-    user_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    first_name VARCHAR(100) NOT NULL,
-    last_name VARCHAR(100) NOT NULL,
-    email VARCHAR(255) UNIQUE NOT NULL,
-    password_hash VARCHAR(255) NOT NULL,
-    phone_number VARCHAR(20),
-    role VARCHAR(10) CHECK (role IN ('guest', 'host', 'admin')) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-CREATE INDEX idx_users_user_id ON users(user_id);
+INSERT INTO users (user_id, first_name, last_name, email, password_hash, phone_number, role)
+VALUES
+    (gen_random_uuid(), 'John', 'Doe', 'john@example.com', 'hashed_password1', '0911111111', 'guest'),
+    (gen_random_uuid(), 'Jane', 'Smith', 'jane@example.com', 'hashed_password2', '0922222222', 'host'),
+    (gen_random_uuid(), 'Mark', 'Brown', 'mark@example.com', 'hashed_password3', '0933333333', 'host'),
+    (gen_random_uuid(), 'Admin', 'User', 'admin@example.com', 'hashed_admin_pass', '0944444444', 'admin');
 
 -- ===========================
--- PROPERTY TABLE
+-- PROPERTIES
 -- ===========================
-CREATE TABLE properties (
-    property_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    host_id UUID NOT NULL,
-    name VARCHAR(255) NOT NULL,
-    description TEXT NOT NULL,
-    location VARCHAR(255) NOT NULL,
-    price_per_night DECIMAL(10,2) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
-    CONSTRAINT fk_property_host FOREIGN KEY (host_id) REFERENCES users(user_id)
-);
-
-CREATE INDEX idx_properties_property_id ON properties(property_id);
+INSERT INTO properties (property_id, host_id, name, description, location, price_per_night)
+VALUES
+    (gen_random_uuid(), (SELECT user_id FROM users WHERE email = 'jane@example.com'), 'Lake View Resort', 'A peaceful resort overlooking the lake.', 'Bishoftu, Ethiopia', 120.00),
+    (gen_random_uuid(), (SELECT user_id FROM users WHERE email = 'mark@example.com'), 'Sunset Villa', 'Spacious villa with beautiful sunset views.', 'Bishoftu, Ethiopia', 200.00);
 
 -- ===========================
--- BOOKING TABLE
+-- BOOKINGS
 -- ===========================
-CREATE TABLE bookings (
-    booking_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    property_id UUID NOT NULL,
-    user_id UUID NOT NULL,
-    start_date DATE NOT NULL,
-    end_date DATE NOT NULL,
-    total_price DECIMAL(10,2) NOT NULL,
-    status VARCHAR(10) CHECK (status IN ('pending', 'confirmed', 'canceled')) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_booking_property FOREIGN KEY (property_id) REFERENCES properties(property_id),
-    CONSTRAINT fk_booking_user FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
+INSERT INTO bookings (booking_id, property_id, user_id, start_date, end_date, total_price, status)
+VALUES
+    (gen_random_uuid(),
+     (SELECT property_id FROM properties WHERE name = 'Lake View Resort'),
+     (SELECT user_id FROM users WHERE email = 'john@example.com'),
+     '2025-10-01', '2025-10-05', 480.00, 'confirmed'),
 
-CREATE INDEX idx_bookings_booking_id ON bookings(booking_id);
+    (gen_random_uuid(),
+     (SELECT property_id FROM properties WHERE name = 'Sunset Villa'),
+     (SELECT user_id FROM users WHERE email = 'john@example.com'),
+     '2025-11-10', '2025-11-12', 400.00, 'pending');
 
 -- ===========================
--- PAYMENT TABLE
+-- PAYMENTS
 -- ===========================
-CREATE TABLE payments (
-    payment_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    booking_id UUID NOT NULL,
-    amount DECIMAL(10,2) NOT NULL,
-    payment_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    payment_method VARCHAR(20) CHECK (payment_method IN ('credit_card', 'paypal', 'stripe')) NOT NULL,
-    CONSTRAINT fk_payment_booking FOREIGN KEY (booking_id) REFERENCES bookings(booking_id)
-);
-
-CREATE INDEX idx_payments_payment_id ON payments(payment_id);
+INSERT INTO payments (payment_id, booking_id, amount, payment_method)
+VALUES
+    (gen_random_uuid(),
+     (SELECT booking_id FROM bookings WHERE status = 'confirmed'),
+     480.00, 'credit_card');
 
 -- ===========================
--- REVIEW TABLE
+-- REVIEWS
 -- ===========================
-CREATE TABLE reviews (
-    review_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    property_id UUID NOT NULL,
-    user_id UUID NOT NULL,
-    rating INT CHECK (rating >= 1 AND rating <= 5) NOT NULL,
-    comment TEXT NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_review_property FOREIGN KEY (property_id) REFERENCES properties(property_id),
-    CONSTRAINT fk_review_user FOREIGN KEY (user_id) REFERENCES users(user_id)
-);
-
-CREATE INDEX idx_reviews_review_id ON reviews(review_id);
+INSERT INTO reviews (review_id, property_id, user_id, rating, comment)
+VALUES
+    (gen_random_uuid(),
+     (SELECT property_id FROM properties WHERE name = 'Lake View Resort'),
+     (SELECT user_id FROM users WHERE email = 'john@example.com'),
+     5, 'Wonderful stay! Great hospitality and clean rooms.');
 
 -- ===========================
--- MESSAGE TABLE
+-- MESSAGES
 -- ===========================
-CREATE TABLE messages (
-    message_id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-    sender_id UUID NOT NULL,
-    recipient_id UUID NOT NULL,
-    message_body TEXT NOT NULL,
-    sent_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    CONSTRAINT fk_message_sender FOREIGN KEY (sender_id) REFERENCES users(user_id),
-    CONSTRAINT fk_message_recipient FOREIGN KEY (recipient_id) REFERENCES users(user_id)
-);
-
-CREATE INDEX idx_messages_message_id ON messages(message_id);
-
+INSERT INTO messages (message_id, sender_id, recipient_id, message_body)
+VALUES
+    (gen_random_uuid(),
+     (SELECT user_id FROM users WHERE email = 'john@example.com'),
+     (SELECT user_id FROM users WHERE email = 'jane@example.com'),
+     'Hi Jane, I really enjoyed staying at your resort!'),
+    
+    (gen_random_uuid(),
+     (SELECT user_id FROM users WHERE email = 'jane@example.com'),
+     (SELECT user_id FROM users WHERE email = 'john@example.com'),
+     'Thank you, John! Glad you had a great time. Hope to host you again!');
