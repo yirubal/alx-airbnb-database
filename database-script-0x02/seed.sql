@@ -1,6 +1,6 @@
 -- seed.sql
 -- Airbnb Clone - Sample Data Seeding Script
--- Author: [Your Name]
+-- Author: Gedion
 -- Repository: alx-airbnb-database
 
 -- ===========================
